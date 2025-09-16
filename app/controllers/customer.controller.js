@@ -114,3 +114,30 @@ exports.deleteAll = (req, res) => {
     else res.send({ message: `All Customers were deleted successfully!` });
   });
 };
+
+// Process large batch of customers with optimized CPU usage
+exports.processLargeBatch = (req, res) => {
+  // Validate request
+  if (!req.body || !req.body.data || !Array.isArray(req.body.data)) {
+    res.status(400).send({
+      message: "Batch data must be provided as an array in 'data' field!"
+    });
+    return;
+  }
+
+  const { data: batchData, options = {} } = req.body;
+  
+  // Process the large batch using the optimized function
+  Customer.processLargeBatch(batchData, options, (err, summary) => {
+    if (err) {
+      res.status(500).send({
+        message: err.message || "Some error occurred while processing the batch."
+      });
+    } else {
+      res.send({
+        message: "Batch processing completed successfully!",
+        summary
+      });
+    }
+  });
+};
