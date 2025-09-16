@@ -16,6 +16,9 @@ module.exports = app => {
   // Delete a Customer with customerId
   app.delete("/customers/:customerId", customers.delete);
 
-  // Create a new Customer
+  // Delete all Customers
   app.delete("/customers", customers.deleteAll);
+
+  // Process large batches of customers
+  app.post("/customers/batch", customers.processLargeBatch);
 };

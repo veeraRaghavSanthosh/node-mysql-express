@@ -114,3 +114,45 @@ exports.deleteAll = (req, res) => {
     else res.send({ message: `All Customers were deleted successfully!` });
   });
 };
+
+// Process large batches of customers efficiently
+exports.processLargeBatch = (req, res) => {
+  // Validate request
+  if (!req.body || !req.body.batchData) {
+    return res.status(400).send({
+      message: "batchData is required and cannot be empty!"
+    });
+  }
+
+  const { batchData, options = {} } = req.body;
+  
+  // Validate operation type
+  const validOperations = ['create', 'update', 'delete'];
+  if (options.operation && !validOperations.includes(options.operation)) {
+    return res.status(400).send({
+      message: `Invalid operation. Must be one of: ${validOperations.join(', ')}`
+    });
+  }
+
+  // Process the batch
+  Customer.processLargeBatch(batchData, options, (err, data) => {
+    if (err) {
+      // Handle partial success scenarios
+      if (err.message && err.message.includes("completed with errors")) {
+        return res.status(207).send({
+          message: err.message,
+          errors: err.errors,
+          processed: err.processed,
+          total: err.total,
+          results: data
+        });
+      }
+      
+      return res.status(500).send({
+        message: err.message || "Some error occurred while processing the batch."
+      });
+    }
+    
+    res.send(data);
+  });
+};
