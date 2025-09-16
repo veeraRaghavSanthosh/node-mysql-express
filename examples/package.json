@@ -1,0 +1,31 @@
+{
+  "name": "customer-api-examples",
+  "version": "1.0.0",
+  "description": "Usage examples for the Node.js Express MySQL Customer API",
+  "main": "usage-javascript.js",
+  "scripts": {
+    "demo-js": "node usage-javascript.js",
+    "demo-ts": "npx ts-node usage-typescript.ts",
+    "build-ts": "npx tsc usage-typescript.ts --outDir dist --target ES2020 --module commonjs --esModuleInterop",
+    "demo-ts-compiled": "npm run build-ts && node dist/usage-typescript.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mysql",
+    "rest-api",
+    "typescript",
+    "javascript",
+    "examples"
+  ],
+  "author": "API Examples",
+  "license": "ISC"
+}
