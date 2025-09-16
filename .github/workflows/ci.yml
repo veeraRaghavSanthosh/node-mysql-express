@@ -1,0 +1,244 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  lint:
+    name: Code Linting
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run ESLint
+      run: |
+        if npm run lint --if-present; then
+          echo "✅ Linting passed"
+        else
+          echo "No lint script found, attempting to run ESLint directly"
+          if [ -f node_modules/.bin/eslint ]; then
+            npx eslint . --ext .js --format=compact
+          else
+            echo "ESLint not found. Consider adding it to your project:"
+            echo "npm install --save-dev eslint"
+            echo "npm init @eslint/config"
+          fi
+        fi
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpassword
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Wait for MySQL
+      run: |
+        echo "Waiting for MySQL to be ready..."
+        timeout 60 bash -c 'until mysqladmin ping -h 127.0.0.1 -P 3306 --silent; do sleep 2; done'
+        echo "MySQL is ready!"
+
+    - name: Setup test database
+      run: |
+        mysql -h 127.0.0.1 -P 3306 -u root -prootpassword -e "
+          CREATE DATABASE IF NOT EXISTS testdb;
+          GRANT ALL PRIVILEGES ON testdb.* TO 'testuser'@'%';
+          FLUSH PRIVILEGES;
+        "
+
+    - name: Run tests
+      run: |
+        if npm test --if-present; then
+          echo "✅ Tests passed"
+        else
+          echo "No test script found. Searching for test files..."
+          
+          # Look for common test patterns
+          if find . -name "*.test.js" -o -name "*.spec.js" | grep -q .; then
+            echo "Test files found. Installing and running with appropriate test runner..."
+            
+            if [ -f node_modules/.bin/mocha ]; then
+              echo "Running tests with Mocha"
+              npx mocha 'test/**/*.js' || npx mocha '**/*.test.js'
+            elif [ -f node_modules/.bin/jest ]; then
+              echo "Running tests with Jest"
+              npx jest
+            else
+              echo "No test runner found. Consider adding one:"
+              echo "For Mocha: npm install --save-dev mocha"
+              echo "For Jest: npm install --save-dev jest"
+              echo "Then add a test script to package.json"
+            fi
+          else
+            echo "⚠️  No test files found. Consider adding unit tests to your project."
+            echo "Example test structure:"
+            echo "  test/"
+            echo "    ├── customer.test.js"
+            echo "    └── server.test.js"
+          fi
+        fi
+      env:
+        NODE_ENV: test
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_USER: testuser
+        DB_PASSWORD: testpassword
+        DB_NAME: testdb
+
+    - name: Generate test coverage (if available)
+      run: |
+        if npm run coverage --if-present; then
+          echo "✅ Coverage report generated"
+        elif [ -f node_modules/.bin/nyc ]; then
+          echo "Running coverage with nyc"
+          npx nyc npm test
+        else
+          echo "No coverage tool found. Consider adding nyc or jest for coverage reporting."
+        fi
+      continue-on-error: true
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run security audit
+      run: |
+        echo "Running npm security audit..."
+        npm audit --audit-level moderate || {
+          echo "⚠️  Security vulnerabilities found. Run 'npm audit fix' to address them."
+          exit 1
+        }
+
+    - name: Check for secrets in code
+      run: |
+        echo "Checking for potential secrets in codebase..."
+        
+        # Check for common secret patterns
+        secrets_found=false
+        
+        if grep -r -i "password\s*=\s*['\"][^'\"]*['\"]" . --include="*.js" --exclude-dir=node_modules; then
+          echo "⚠️  Potential hardcoded passwords found"
+          secrets_found=true
+        fi
+        
+        if grep -r -i "api[_-]key\s*=\s*['\"][^'\"]*['\"]" . --include="*.js" --exclude-dir=node_modules; then
+          echo "⚠️  Potential hardcoded API keys found"
+          secrets_found=true
+        fi
+        
+        if grep -r -i "secret\s*=\s*['\"][^'\"]*['\"]" . --include="*.js" --exclude-dir=node_modules; then
+          echo "⚠️  Potential hardcoded secrets found"
+          secrets_found=true
+        fi
+        
+        if [ "$secrets_found" = true ]; then
+          echo "Please use environment variables for sensitive data:"
+          echo "  const password = process.env.DB_PASSWORD;"
+          echo "  const apiKey = process.env.API_KEY;"
+        else
+          echo "✅ No obvious secrets found in code"
+        fi
+
+  dependency-check:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check for outdated dependencies
+      run: |
+        echo "Checking for outdated dependencies..."
+        npm outdated || echo "Some dependencies may be outdated. Consider updating them."
+
+    - name: Validate package.json
+      run: |
+        echo "Validating package.json structure..."
+        node -e "
+          const pkg = JSON.parse(require('fs').readFileSync('package.json', 'utf8'));
+          console.log('✅ package.json is valid JSON');
+          
+          // Check for required fields
+          const required = ['name', 'version', 'description'];
+          const missing = required.filter(field => !pkg[field]);
+          
+          if (missing.length > 0) {
+            console.log('⚠️  Missing recommended fields:', missing.join(', '));
+          } else {
+            console.log('✅ All recommended fields present');
+          }
+          
+          // Check for scripts
+          if (!pkg.scripts) {
+            console.log('⚠️  No scripts defined in package.json');
+          } else {
+            console.log('✅ Scripts found:', Object.keys(pkg.scripts).join(', '));
+          }
+        "

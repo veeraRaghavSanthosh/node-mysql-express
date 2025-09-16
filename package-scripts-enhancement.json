@@ -1,0 +1,46 @@
+{
+  "_comment": "Add these scripts to your existing package.json to fully utilize the CI workflows",
+  "scripts": {
+    "test": "mocha test/**/*.js --timeout 5000",
+    "test:watch": "mocha test/**/*.js --watch",
+    "test:coverage": "nyc mocha test/**/*.js",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "audit:security": "npm audit --audit-level moderate",
+    "audit:fix": "npm audit fix",
+    "deps:check": "npm outdated",
+    "deps:update": "npm update"
+  },
+  "devDependencies": {
+    "_comment": "Recommended development dependencies for testing and code quality",
+    "mocha": "^10.2.0",
+    "supertest": "^6.3.3",
+    "chai": "^4.3.7",
+    "nyc": "^15.1.0",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.3",
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "_comment": "Specify Node.js version compatibility",
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "nyc": {
+    "_comment": "Coverage configuration",
+    "exclude": [
+      "test/**",
+      "node_modules/**"
+    ],
+    "reporter": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "report-dir": "./coverage"
+  }
+}

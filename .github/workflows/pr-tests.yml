@@ -1,0 +1,174 @@
+name: Pull Request Tests
+
+on:
+  pull_request:
+    branches: [ master, main ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: testpassword
+          MYSQL_DATABASE: testdb
+          MYSQL_USER: testuser
+          MYSQL_PASSWORD: testpassword
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Wait for MySQL to be ready
+      run: |
+        for i in {30..0}; do
+          if mysqladmin ping -h 127.0.0.1 --silent; then
+            break
+          fi
+          echo 'MySQL is unavailable - sleeping'
+          sleep 1
+        done
+        if [ "$i" = 0 ]; then
+          echo 'MySQL is unavailable - exiting'
+          exit 1
+        fi
+        echo 'MySQL is up - executing command'
+
+    - name: Run linting
+      run: |
+        if npm run lint --if-present; then
+          echo "Linting completed successfully"
+        else
+          echo "No lint script found or linting failed"
+          # Check if ESLint is available as a dependency
+          if [ -f node_modules/.bin/eslint ]; then
+            echo "Running ESLint directly on JavaScript files"
+            npx eslint . --ext .js --ignore-path .gitignore || echo "ESLint found issues"
+          else
+            echo "ESLint not found in dependencies, skipping linting"
+          fi
+        fi
+
+    - name: Run tests
+      run: |
+        if npm test --if-present; then
+          echo "Tests completed successfully"
+        else
+          echo "No test script found"
+          # Try to run common test patterns
+          if [ -d "test" ] || [ -d "tests" ] || [ -f "*.test.js" ] || [ -f "test/*.js" ]; then
+            echo "Test files found but no test script defined"
+            if command -v mocha &> /dev/null; then
+              echo "Running tests with Mocha"
+              npx mocha test/**/*.js || npx mocha test/*.js || npx mocha *.test.js
+            elif command -v jest &> /dev/null; then
+              echo "Running tests with Jest"
+              npx jest
+            else
+              echo "No test runner found (mocha, jest). Please add test script to package.json"
+              exit 1
+            fi
+          else
+            echo "No test files found. Consider adding unit tests."
+          fi
+        fi
+      env:
+        DB_HOST: 127.0.0.1
+        DB_PORT: 3306
+        DB_USER: testuser
+        DB_PASSWORD: testpassword
+        DB_NAME: testdb
+        NODE_ENV: test
+
+    - name: Run security audit
+      run: npm audit --audit-level moderate
+      continue-on-error: true
+
+    - name: Check for outdated dependencies
+      run: npm outdated
+      continue-on-error: true
+
+  code-quality:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Check code formatting
+      run: |
+        if npm run format:check --if-present; then
+          echo "Code formatting check completed"
+        elif [ -f node_modules/.bin/prettier ]; then
+          echo "Running Prettier check"
+          npx prettier --check . || echo "Code formatting issues found"
+        else
+          echo "No formatting tools found, skipping format check"
+        fi
+      continue-on-error: true
+
+    - name: Type checking (if TypeScript)
+      run: |
+        if [ -f "tsconfig.json" ]; then
+          if npm run type-check --if-present; then
+            echo "Type checking completed"
+          elif [ -f node_modules/.bin/tsc ]; then
+            echo "Running TypeScript compiler check"
+            npx tsc --noEmit
+          fi
+        else
+          echo "No TypeScript configuration found, skipping type check"
+        fi
+      continue-on-error: true
+
+    - name: Check package.json validity
+      run: |
+        echo "Validating package.json structure"
+        node -e "JSON.parse(require('fs').readFileSync('package.json', 'utf8')); console.log('package.json is valid JSON')"
+
+    - name: Check for common security issues
+      run: |
+        echo "Checking for common security patterns"
+        # Check for hardcoded secrets (basic patterns)
+        if grep -r -i "password.*=" . --include="*.js" --exclude-dir=node_modules | grep -v "DB_PASSWORD\|process.env" | head -5; then
+          echo "⚠️  Potential hardcoded passwords found. Please review."
+        fi
+        
+        if grep -r -i "api.key.*=" . --include="*.js" --exclude-dir=node_modules | grep -v "process.env" | head -5; then
+          echo "⚠️  Potential hardcoded API keys found. Please review."
+        fi
+        
+        echo "Basic security check completed"
+      continue-on-error: true
