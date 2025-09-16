@@ -4,12 +4,12 @@ const bodyParser = require("body-parser");
 const app = express();
 
 const authMiddleware=(req,res,next)=>{
-next()
-}
+  next();
+};
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
-app.use('api/*',authMiddleware);
+app.use("api/*",authMiddleware);
 
 
 
@@ -26,24 +26,24 @@ function middleware1 (req,res,next)  {
 
   const users=[
     {
-        "id": 1,
-        "name": "test3"
+      "id": 1,
+      "name": "test3"
     },
     {
-        "id": 2,
-        "name": "test4"
+      "id": 2,
+      "name": "test4"
     }
-];
+  ];
   req.users=users;
-next();
+  next();
   
-};
+}
 
-function middleware2 (req,res,next){
+function middleware2 (req,res,_next){
   const users= req.users;
-   res.json({ user:users });
+  res.json({ user:users });
  
- };
+}
 
 // simple route
 app.get("/user",middleware1 ,middleware2);

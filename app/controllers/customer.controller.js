@@ -88,7 +88,7 @@ exports.update = (req, res) => {
 
 // Delete a Customer with the specified customerId in the request
 exports.delete = (req, res) => {
-  Customer.remove(req.params.customerId, (err, data) => {
+  Customer.remove(req.params.customerId, (err, _data) => {
     if (err) {
       if (err.kind === "not_found") {
         res.status(404).send({
@@ -99,18 +99,18 @@ exports.delete = (req, res) => {
           message: "Could not delete Customer with id " + req.params.customerId
         });
       }
-    } else res.send({ message: `Customer was deleted successfully!` });
+    } else res.send({ message: "Customer was deleted successfully!" });
   });
 };
 
 // Delete all Customers from the database.
 exports.deleteAll = (req, res) => {
-  Customer.removeAll((err, data) => {
+  Customer.removeAll((err, _data) => {
     if (err)
       res.status(500).send({
         message:
           err.message || "Some error occurred while removing all customers."
       });
-    else res.send({ message: `All Customers were deleted successfully!` });
+    else res.send({ message: "All Customers were deleted successfully!" });
   });
 };
