@@ -50,6 +50,13 @@ app.get("/user",middleware1 ,middleware2);
 
 require("./app/routes/customer.routes.js")(app);
 
+// Notification routes (backward compatible addition)
+try {
+  require("./app/routes/notification.routes.js")(app);
+  console.log("Notification system loaded successfully");
+} catch (error) {
+  console.log("Notification system not available:", error.message);
+}
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
