@@ -1,0 +1,32 @@
+{
+  "name": "node-mysql-express-examples",
+  "version": "1.0.0",
+  "description": "Usage examples for the Node.js Express MySQL API",
+  "main": "javascript-usage.js",
+  "scripts": {
+    "test": "node test-examples.js",
+    "demo:js": "node javascript-usage.js",
+    "demo:ts": "ts-node typescript-usage.ts",
+    "build:ts": "tsc typescript-usage.ts --outDir dist --target es2020 --module commonjs --esModuleInterop true --skipLibCheck true",
+    "demo:ts-compiled": "npm run build:ts && node dist/typescript-usage.js"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mysql",
+    "api",
+    "examples",
+    "typescript",
+    "javascript"
+  ],
+  "author": "API Examples",
+  "license": "ISC"
+}
