@@ -1,0 +1,11 @@
+2025-09-16 13:48:09 [DEBUG] [notification] [test_operation]: This is a trace-level debug message | {"testData":{"id":1,"name":"test"}}
+2025-09-16 13:48:09 [DEBUG] [notification] [test_operation]: This is a debug message | {"debugInfo":"Additional debug information"}
+2025-09-16 13:48:09 [INFO] [notification] [test_operation]: This is an info message | {"infoData":"General information"}
+2025-09-16 13:48:09 [WARN] [notification] [test_operation]: This is a warning message | {"warningReason":"Something might be wrong"}
+2025-09-16 13:48:09 [ERROR] [notification] [test_operation]: This is an error message | {"errorCode":"TEST_ERROR","errorDetails":"Error details for debugging"}
+2025-09-16 13:48:09 [DEBUG] [notification] [create]: Customer operation: Test customer created | {"customerData":{"id":123,"name":"Test Customer","email":"test@example.com"}}
+2025-09-16 13:48:09 [INFO] [notification] [create]: Test customer created | {"customerId":123}
+2025-09-16 13:48:09 [DEBUG] [notification] [SELECT]: Database operation executed successfully | {"query":"SELECT * FROM customers WHERE id = ?","params":[123],"resultCount":1}
+2025-09-16 13:48:09 [INFO] [notification] [SELECT]: SELECT operation completed | {"resultCount":1}
+2025-09-16 13:48:09 [DEBUG] [notification] [GET__customers_123]: API request processed | {"method":"GET","endpoint":"/customers/123","statusCode":200,"requestData":"{\"customerId\":123}","responseSize":60,"responseData":"{\"id\":123,\"name\":\"Test Customer\",\"email\":\"test@example.com\"}"}
+2025-09-16 13:48:09 [INFO] [notification] [GET__customers_123]: GET /customers/123 - 200 | {"statusCode":200,"responseSize":60}
