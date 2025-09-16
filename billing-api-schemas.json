@@ -1,0 +1,332 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Billing System API Schemas",
+  "description": "JSON schemas for the Billing System API request and response objects",
+  "definitions": {
+    "Customer": {
+      "type": "object",
+      "title": "Customer",
+      "description": "Customer object with complete information",
+      "required": ["id", "email", "name", "active"],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the customer (auto-generated)",
+          "minimum": 1,
+          "examples": [1, 42, 1337]
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Customer's email address",
+          "maxLength": 255,
+          "examples": ["john.doe@example.com", "jane.smith@company.org"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Customer's full name",
+          "maxLength": 255,
+          "minLength": 1,
+          "examples": ["John Doe", "Jane Smith", "Alice Johnson"]
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the customer account is active",
+          "examples": [true, false]
+        }
+      },
+      "additionalProperties": false
+    },
+    
+    "CustomerInput": {
+      "type": "object",
+      "title": "Customer Input",
+      "description": "Customer input object for creating or updating customers",
+      "required": ["email", "name"],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Customer's email address",
+          "maxLength": 255,
+          "examples": ["john.doe@example.com", "jane.smith@company.org"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Customer's full name",
+          "maxLength": 255,
+          "minLength": 1,
+          "examples": ["John Doe", "Jane Smith", "Alice Johnson"]
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the customer account is active",
+          "default": true,
+          "examples": [true, false]
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "CustomerUpdateInput": {
+      "type": "object",
+      "title": "Customer Update Input",
+      "description": "Customer input object for updating existing customers (all fields optional)",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Customer's email address",
+          "maxLength": 255,
+          "examples": ["john.doe@example.com", "jane.smith@company.org"]
+        },
+        "name": {
+          "type": "string",
+          "description": "Customer's full name",
+          "maxLength": 255,
+          "minLength": 1,
+          "examples": ["John Doe", "Jane Smith", "Alice Johnson"]
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the customer account is active",
+          "examples": [true, false]
+        }
+      },
+      "additionalProperties": false,
+      "minProperties": 1
+    },
+
+    "CustomerList": {
+      "type": "array",
+      "title": "Customer List",
+      "description": "Array of customer objects",
+      "items": {
+        "$ref": "#/definitions/Customer"
+      },
+      "examples": [
+        [],
+        [
+          {
+            "id": 1,
+            "email": "john.doe@example.com",
+            "name": "John Doe",
+            "active": true
+          }
+        ],
+        [
+          {
+            "id": 1,
+            "email": "john.doe@example.com",
+            "name": "John Doe",
+            "active": true
+          },
+          {
+            "id": 2,
+            "email": "jane.smith@example.com",
+            "name": "Jane Smith",
+            "active": false
+          }
+        ]
+      ]
+    },
+
+    "ErrorResponse": {
+      "type": "object",
+      "title": "Error Response",
+      "description": "Standard error response object",
+      "required": ["message"],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Error description",
+          "examples": [
+            "Content can not be empty!",
+            "Not found Customer with id 1.",
+            "Some error occurred while creating the Customer.",
+            "Error retrieving Customer with id 1",
+            "Could not delete Customer with id 1"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "SuccessResponse": {
+      "type": "object",
+      "title": "Success Response",
+      "description": "Standard success response object",
+      "required": ["message"],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "Success message",
+          "examples": [
+            "Customer was deleted successfully!",
+            "All Customers were deleted successfully!"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+
+  "apiResponses": {
+    "createCustomer": {
+      "success": {
+        "status": 200,
+        "schema": {"$ref": "#/definitions/Customer"},
+        "example": {
+          "id": 1,
+          "email": "john.doe@example.com",
+          "name": "John Doe",
+          "active": true
+        }
+      },
+      "badRequest": {
+        "status": 400,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Content can not be empty!"
+        }
+      },
+      "serverError": {
+        "status": 500,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Some error occurred while creating the Customer."
+        }
+      }
+    },
+
+    "getAllCustomers": {
+      "success": {
+        "status": 200,
+        "schema": {"$ref": "#/definitions/CustomerList"},
+        "example": [
+          {
+            "id": 1,
+            "email": "john.doe@example.com",
+            "name": "John Doe",
+            "active": true
+          },
+          {
+            "id": 2,
+            "email": "jane.smith@example.com",
+            "name": "Jane Smith",
+            "active": false
+          }
+        ]
+      },
+      "serverError": {
+        "status": 500,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Some error occurred while retrieving customers."
+        }
+      }
+    },
+
+    "getCustomerById": {
+      "success": {
+        "status": 200,
+        "schema": {"$ref": "#/definitions/Customer"},
+        "example": {
+          "id": 1,
+          "email": "john.doe@example.com",
+          "name": "John Doe",
+          "active": true
+        }
+      },
+      "notFound": {
+        "status": 404,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Not found Customer with id 1."
+        }
+      },
+      "serverError": {
+        "status": 500,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Error retrieving Customer with id 1"
+        }
+      }
+    },
+
+    "updateCustomer": {
+      "success": {
+        "status": 200,
+        "schema": {"$ref": "#/definitions/Customer"},
+        "example": {
+          "id": 1,
+          "email": "john.updated@example.com",
+          "name": "John Updated",
+          "active": false
+        }
+      },
+      "badRequest": {
+        "status": 400,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Content can not be empty!"
+        }
+      },
+      "notFound": {
+        "status": 404,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Not found Customer with id 1."
+        }
+      },
+      "serverError": {
+        "status": 500,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Error updating Customer with id 1"
+        }
+      }
+    },
+
+    "deleteCustomer": {
+      "success": {
+        "status": 200,
+        "schema": {"$ref": "#/definitions/SuccessResponse"},
+        "example": {
+          "message": "Customer was deleted successfully!"
+        }
+      },
+      "notFound": {
+        "status": 404,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Not found Customer with id 1."
+        }
+      },
+      "serverError": {
+        "status": 500,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Could not delete Customer with id 1"
+        }
+      }
+    },
+
+    "deleteAllCustomers": {
+      "success": {
+        "status": 200,
+        "schema": {"$ref": "#/definitions/SuccessResponse"},
+        "example": {
+          "message": "All Customers were deleted successfully!"
+        }
+      },
+      "serverError": {
+        "status": 500,
+        "schema": {"$ref": "#/definitions/ErrorResponse"},
+        "example": {
+          "message": "Some error occurred while removing all customers."
+        }
+      }
+    }
+  }
+}
