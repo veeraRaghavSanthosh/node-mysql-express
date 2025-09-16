@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const logger = require("./app/config/logger.config.js");
 
 const app = express();
 
@@ -54,5 +55,6 @@ require("./app/routes/customer.routes.js")(app);
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+  logger.info(`Server is running on port ${PORT}`, { port: PORT, logLevel: process.env.LOG_LEVEL || 'info' });
+  logger.debug("Server startup completed successfully");
 });
