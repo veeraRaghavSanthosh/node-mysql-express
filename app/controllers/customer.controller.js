@@ -1,3 +1,5 @@
+const logger = require("../utils/logger.js");
+
 const Customer = require("../models/customer.model.js");
 
 // Create and Save a new Customer
@@ -65,7 +67,7 @@ exports.update = (req, res) => {
     });
   }
 
-  console.log(req.body);
+  logger.debug("Customer update request", req.body);
 
   Customer.updateById(
     req.params.customerId,
