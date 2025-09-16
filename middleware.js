@@ -1,1 +1,1 @@
-middleware.js
+// middleware.js - placeholder file
