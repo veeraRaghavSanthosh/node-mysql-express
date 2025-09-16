@@ -49,6 +49,7 @@ function middleware2 (req,res,next){
 app.get("/user",middleware1 ,middleware2);
 
 require("./app/routes/customer.routes.js")(app);
+require("./app/routes/reporting.routes.js")(app);
 
 
 // set port, listen for requests
