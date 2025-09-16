@@ -3,6 +3,44 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
+// Basic security headers middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Simple rate limiting middleware
+const rateLimit = {};
+const createRateLimit = (windowMs = 15 * 60 * 1000, max = 100) => {
+  return (req, res, next) => {
+    const clientIP = req.ip || req.connection.remoteAddress;
+    const now = Date.now();
+    const windowStart = now - windowMs;
+
+    if (!rateLimit[clientIP]) {
+      rateLimit[clientIP] = [];
+    }
+    
+    rateLimit[clientIP] = rateLimit[clientIP].filter(time => time > windowStart);
+    
+    if (rateLimit[clientIP].length >= max) {
+      return res.status(429).json({
+        error: 'Too many requests from this IP, please try again later.',
+        retryAfter: Math.ceil(windowMs / 1000)
+      });
+    }
+    
+    rateLimit[clientIP].push(now);
+    next();
+  };
+};
+
+// Apply rate limiting to all routes
+app.use(createRateLimit(15 * 60 * 1000, 100)); // 100 requests per 15 minutes
+
 const authMiddleware=(req,res,next)=>{
 next()
 }

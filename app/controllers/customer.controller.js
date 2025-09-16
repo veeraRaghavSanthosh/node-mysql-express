@@ -1,19 +1,64 @@
 const Customer = require("../models/customer.model.js");
 
+// Input validation functions
+const isValidEmail = (email) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidName = (name) => {
+  if (!name || typeof name !== 'string') return false;
+  const trimmedName = name.trim();
+  return trimmedName.length >= 1 && trimmedName.length <= 100 && /^[a-zA-Z\s'-]+$/.test(trimmedName);
+};
+
+const sanitizeInput = (input) => {
+  if (typeof input === 'string') {
+    return input
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]*>/g, '')
+      .trim();
+  }
+  return input;
+};
+
 // Create and Save a new Customer
 exports.create = (req, res) => {
   // Validate request
   if (!req.body) {
-    res.status(400).send({
+    return res.status(400).send({
       message: "Content can not be empty!"
     });
   }
 
+  // Validate and sanitize input
+  const errors = [];
+  
+  if (!req.body.email || !isValidEmail(req.body.email)) {
+    errors.push({ field: 'email', message: 'Please provide a valid email address' });
+  }
+  
+  if (!req.body.name || !isValidName(req.body.name)) {
+    errors.push({ field: 'name', message: 'Name must be between 1 and 100 characters and contain only letters, spaces, hyphens, and apostrophes' });
+  }
+  
+  if (errors.length > 0) {
+    return res.status(400).json({
+      message: 'Invalid input data',
+      errors: errors
+    });
+  }
+
+  // Sanitize inputs
+  const sanitizedEmail = sanitizeInput(req.body.email).toLowerCase().trim();
+  const sanitizedName = sanitizeInput(req.body.name).trim();
+  const active = req.body.active === true || req.body.active === 'true';
+
   // Create a Customer
   const customer = new Customer({
-    email: req.body.email,
-    name: req.body.name,
-    active: req.body.active
+    email: sanitizedEmail,
+    name: sanitizedName,
+    active: active
   });
 
   // Save Customer in the database
