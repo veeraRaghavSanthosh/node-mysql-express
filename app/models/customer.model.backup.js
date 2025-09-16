@@ -41,67 +41,72 @@ Customer.findById = async (customerId) => {
   }
 };
 
-Customer.getAll = async () => {
-  try {
-    const res = await query("SELECT * FROM customers");
+Customer.getAll = result => {
+  sql.query("SELECT * FROM customers", (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(null, err);
+      return;
+    }
+
     console.log("customers: ", res);
-    return res;
-  } catch (err) {
-    console.log("error: ", err);
-    throw err;
-  }
+    result(null, res);
+  });
 };
 
-Customer.updateById = async (id, customer) => {
-  try {
-    const res = await query(
-      "UPDATE customers SET email = ?, name = ?, active = ? WHERE id = ?",
-      [customer.email, customer.name, customer.active, id]
-    );
-    
-    if (res.affectedRows == 0) {
-      // not found Customer with the id
-      const error = new Error("Customer not found");
-      error.kind = "not_found";
-      throw error;
+Customer.updateById = (id, customer, result) => {
+  sql.query(
+    "UPDATE customers SET email = ?, name = ?, active = ? WHERE id = ?",
+    [customer.email, customer.name, customer.active, id],
+    (err, res) => {
+      if (err) {
+        console.log("error: ", err);
+        result(null, err);
+        return;
+      }
+
+      if (res.affectedRows == 0) {
+        // not found Customer with the id
+        result({ kind: "not_found" }, null);
+        return;
+      }
+
+      console.log("updated customer: ", { id: id, ...customer });
+      result(null, { id: id, ...customer });
     }
-    
-    console.log("updated customer: ", { id: id, ...customer });
-    return { id: id, ...customer };
-  } catch (err) {
-    console.log("error: ", err);
-    throw err;
-  }
+  );
 };
 
-Customer.remove = async (id) => {
-  try {
-    const res = await query("DELETE FROM customers WHERE id = ?", id);
-    
+Customer.remove = (id, result) => {
+  sql.query("DELETE FROM customers WHERE id = ?", id, (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(null, err);
+      return;
+    }
+
     if (res.affectedRows == 0) {
       // not found Customer with the id
-      const error = new Error("Customer not found");
-      error.kind = "not_found";
-      throw error;
+      result({ kind: "not_found" }, null);
+      return;
     }
-    
+
     console.log("deleted customer with id: ", id);
-    return res;
-  } catch (err) {
-    console.log("error: ", err);
-    throw err;
-  }
+    result(null, res);
+  });
 };
 
-Customer.removeAll = async () => {
-  try {
-    const res = await query("DELETE FROM customers");
+Customer.removeAll = result => {
+  sql.query("DELETE FROM customers", (err, res) => {
+    if (err) {
+      console.log("error: ", err);
+      result(null, err);
+      return;
+    }
+
     console.log(`deleted ${res.affectedRows} customers`);
-    return res;
-  } catch (err) {
-    console.log("error: ", err);
-    throw err;
-  }
+    result(null, res);
+  });
 };
 
 module.exports = Customer;
