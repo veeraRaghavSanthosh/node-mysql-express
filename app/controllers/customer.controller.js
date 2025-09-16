@@ -114,3 +114,60 @@ exports.deleteAll = (req, res) => {
     else res.send({ message: `All Customers were deleted successfully!` });
   });
 };
+
+// Process large batch operations with optimized performance
+exports.processLargeBatch = async (req, res) => {
+  try {
+    // Validate request
+    if (!req.body || !req.body.operation || !req.body.data) {
+      return res.status(400).send({
+        message: "Operation and data are required. Format: { operation: 'create|update|delete', data: [...], options?: {...} }"
+      });
+    }
+
+    const { operation, data, options = {} } = req.body;
+
+    // Validate operation type
+    if (!['create', 'update', 'delete'].includes(operation)) {
+      return res.status(400).send({
+        message: "Operation must be one of: create, update, delete"
+      });
+    }
+
+    // Validate data format
+    if (!Array.isArray(data) || data.length === 0) {
+      return res.status(400).send({
+        message: "Data must be a non-empty array"
+      });
+    }
+
+    // Set up progress tracking if requested
+    let progressCallback = null;
+    if (options.trackProgress) {
+      progressCallback = (progress) => {
+        console.log(`Batch Progress: ${progress.processed}/${progress.total} (${Math.round(progress.processed/progress.total*100)}%)`);
+      };
+    }
+
+    // Process the batch with optimized settings
+    const result = await Customer.processLargeBatch(operation, data, {
+      ...options,
+      onProgress: progressCallback,
+      onError: (error, batchIndex, batch) => {
+        console.error(`Error in batch ${batchIndex}:`, error.message);
+      }
+    });
+
+    res.send({
+      success: true,
+      message: `Batch ${operation} completed successfully`,
+      ...result
+    });
+
+  } catch (error) {
+    console.error('Batch processing error:', error);
+    res.status(500).send({
+      message: error.message || "Some error occurred during batch processing."
+    });
+  }
+};
