@@ -1,22 +1,18 @@
 {
-  "name": "nodejs-express-mysql",
+  "name": "orders-legacy-id-migration",
   "version": "1.0.0",
-  "description": "Node.js Restful CRUD API with Node.js, Express and MySQL",
-  "main": "server.js",
+  "description": "Migration to add legacy_id column to orders table",
+  "main": "migrate.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "migrate:up": "node migrate.js up",
+    "migrate:down": "node migrate.js down",
+    "migrate:up:legacy-id": "node migrate.js up 001_add_legacy_id_to_orders.js",
+    "migrate:down:legacy-id": "node migrate.js down 001_add_legacy_id_to_orders.js"
   },
-  "keywords": [
-    "nodejs",
-    "express",
-    "mysql",
-    "restapi"
-  ],
-  "author": "veera",
-  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "mysql": "^2.17.1"
-  }
+    "mysql2": "^3.6.0"
+  },
+  "keywords": ["migration", "mysql", "orders", "legacy-id"],
+  "author": "",
+  "license": "ISC"
 }
