@@ -4,13 +4,18 @@
   "description": "Node.js Restful CRUD API with Node.js, Express and MySQL",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:flaky": "jest --testNamePattern=\"orderProcessor_should_handle_zero_items\"",
+    "start": "node server.js"
   },
   "keywords": [
     "nodejs",
     "express",
     "mysql",
-    "restapi"
+    "restapi",
+    "order-processing"
   ],
   "author": "veera",
   "license": "ISC",
@@ -18,5 +23,18 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "mysql": "^2.17.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "app/**/*.js",
+      "!app/config/**",
+      "!**/node_modules/**"
+    ],
+    "coverageDirectory": "coverage",
+    "coverageReporters": ["text", "lcov", "html"]
   }
 }
