@@ -2,12 +2,19 @@ const sql = require("./db.js");
 
 // constructor
 const Customer = function(customer) {
+  if (!customer || typeof customer !== 'object') {
+    throw new TypeError('Customer parameter must be a valid object');
+  }
   this.email = customer.email;
   this.name = customer.name;
   this.active = customer.active;
 };
 
 Customer.create = (newCustomer, result) => {
+  if (!newCustomer || typeof newCustomer !== 'object') {
+    result(new TypeError('newCustomer parameter must be a valid object'), null);
+    return;
+  }
   sql.query("INSERT INTO customers SET ?", newCustomer, (err, res) => {
     if (err) {
       console.log("error: ", err);
@@ -21,6 +28,10 @@ Customer.create = (newCustomer, result) => {
 };
 
 Customer.findById = (customerId, result) => {
+  if (customerId == null || customerId == undefined) {
+    result(new TypeError('customerId parameter cannot be null or undefined'), null);
+    return;
+  }
   sql.query(`SELECT * FROM customers WHERE id = ${customerId}`, (err, res) => {
     if (err) {
       console.log("error: ", err);
@@ -53,6 +64,14 @@ Customer.getAll = result => {
 };
 
 Customer.updateById = (id, customer, result) => {
+  if (id == null || id == undefined) {
+    result(null, new TypeError('id parameter cannot be null or undefined'));
+    return;
+  }
+  if (!customer || typeof customer !== 'object') {
+    result(null, new TypeError('customer parameter must be a valid object'));
+    return;
+  }
   sql.query(
     "UPDATE customers SET email = ?, name = ?, active = ? WHERE id = ?",
     [customer.email, customer.name, customer.active, id],
@@ -76,6 +95,10 @@ Customer.updateById = (id, customer, result) => {
 };
 
 Customer.remove = (id, result) => {
+  if (id == null || id == undefined) {
+    result(null, new TypeError('id parameter cannot be null or undefined'));
+    return;
+  }
   sql.query("DELETE FROM customers WHERE id = ?", id, (err, res) => {
     if (err) {
       console.log("error: ", err);
