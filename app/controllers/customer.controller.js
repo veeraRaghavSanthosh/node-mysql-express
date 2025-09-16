@@ -7,6 +7,24 @@ exports.create = (req, res) => {
     res.status(400).send({
       message: "Content can not be empty!"
     });
+    return;
+  }
+
+  // Validate required fields
+  if (!req.body.email || !req.body.name) {
+    res.status(400).send({
+      message: "Email and name are required!"
+    });
+    return;
+  }
+
+  // Basic email validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(req.body.email)) {
+    res.status(400).send({
+      message: "Please provide a valid email address!"
+    });
+    return;
   }
 
   // Create a Customer
@@ -41,6 +59,14 @@ exports.findAll = (req, res) => {
 
 // Find a single Customer with a customerId
 exports.findOne = (req, res) => {
+  // Validate customerId is a number
+  if (isNaN(req.params.customerId)) {
+    res.status(400).send({
+      message: "Invalid customer ID!"
+    });
+    return;
+  }
+
   Customer.findById(req.params.customerId, (err, data) => {
     if (err) {
       if (err.kind === "not_found") {
@@ -63,6 +89,26 @@ exports.update = (req, res) => {
     res.status(400).send({
       message: "Content can not be empty!"
     });
+    return;
+  }
+
+  // Validate customerId is a number
+  if (isNaN(req.params.customerId)) {
+    res.status(400).send({
+      message: "Invalid customer ID!"
+    });
+    return;
+  }
+
+  // Basic email validation if email is provided
+  if (req.body.email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(req.body.email)) {
+      res.status(400).send({
+        message: "Please provide a valid email address!"
+      });
+      return;
+    }
   }
 
   console.log(req.body);
@@ -88,6 +134,14 @@ exports.update = (req, res) => {
 
 // Delete a Customer with the specified customerId in the request
 exports.delete = (req, res) => {
+  // Validate customerId is a number
+  if (isNaN(req.params.customerId)) {
+    res.status(400).send({
+      message: "Invalid customer ID!"
+    });
+    return;
+  }
+
   Customer.remove(req.params.customerId, (err, data) => {
     if (err) {
       if (err.kind === "not_found") {

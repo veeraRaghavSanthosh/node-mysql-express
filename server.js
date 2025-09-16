@@ -1,7 +1,12 @@
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 
 const app = express();
+
+// Security middleware
+app.use(express.json({ limit: '10mb' })); // Limit JSON payload size
+app.disable('x-powered-by'); // Hide Express server information
 
 const authMiddleware=(req,res,next)=>{
 next()
@@ -9,7 +14,7 @@ next()
 
 // parse requests of content-type - application/json
 app.use(bodyParser.json());
-app.use('api/*',authMiddleware);
+app.use('/api/*',authMiddleware);
 
 
 
