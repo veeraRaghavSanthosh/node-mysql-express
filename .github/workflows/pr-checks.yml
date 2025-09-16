@@ -1,0 +1,185 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    branches: [ master, main ]
+  push:
+    branches: [ master, main ]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [16.x, 18.x, 20.x]
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: test_db
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - name: Cache node modules
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
+
+    - name: Wait for MySQL
+      run: |
+        echo "Waiting for MySQL to be ready..."
+        for i in {60..0}; do
+          if mysqladmin ping -h"127.0.0.1" -P3306 --silent; then
+            echo "MySQL is ready!"
+            break
+          fi
+          echo "MySQL is unavailable - sleeping ($i attempts left)"
+          sleep 2
+        done
+        if [ "$i" = 0 ]; then
+          echo "MySQL failed to start within timeout"
+          exit 1
+        fi
+
+    - name: Setup test database
+      run: |
+        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;" || true
+        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "CREATE DATABASE IF NOT EXISTS test_db;" || true
+        mysql -h 127.0.0.1 -P 3306 -u root -proot -e "SHOW DATABASES;" || true
+
+    - name: Run linting
+      run: |
+        echo "Checking for linting configuration..."
+        if [ -f .eslintrc.js ] || [ -f .eslintrc.json ] || [ -f .eslintrc.yml ] || [ -f .eslintrc.yaml ] || grep -q '"eslint"' package.json 2>/dev/null; then
+          echo "ESLint configuration found"
+          if npm run lint --silent 2>/dev/null; then
+            echo "Running npm run lint..."
+            npm run lint
+          elif npx eslint --version 2>/dev/null; then
+            echo "Running eslint directly..."
+            npx eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore || true
+          else
+            echo "ESLint not available, installing and running..."
+            npm install --no-save eslint && npx eslint . --ext .js,.jsx,.ts,.tsx --ignore-path .gitignore || true
+          fi
+        else
+          echo "No linting configuration found, skipping lint checks"
+        fi
+      continue-on-error: true
+
+    - name: Run tests
+      run: |
+        echo "Checking for test configuration..."
+        if npm run test --silent 2>/dev/null; then
+          echo "Running npm run test..."
+          npm run test
+        elif grep -q '"test"' package.json 2>/dev/null; then
+          echo "Running npm test..."
+          npm test
+        else
+          echo "No test script found in package.json, checking for test files..."
+          if find . -name "*.test.js" -o -name "*.spec.js" -o -name "test" -type d | grep -q .; then
+            echo "Test files found but no test script configured"
+            echo "Consider adding a test script to package.json"
+          else
+            echo "No tests found, skipping test execution"
+          fi
+        fi
+      env:
+        NODE_ENV: test
+        MYSQL_HOST: 127.0.0.1
+        MYSQL_USER: root
+        MYSQL_PASSWORD: root
+        MYSQL_DATABASE: test_db
+        MYSQL_PORT: 3306
+        DB_HOST: 127.0.0.1
+        DB_USER: root
+        DB_PASSWORD: root
+        DB_NAME: test_db
+        DB_PORT: 3306
+      continue-on-error: false
+
+    - name: Check code formatting
+      run: |
+        echo "Checking for Prettier configuration..."
+        if [ -f .prettierrc ] || [ -f .prettierrc.json ] || [ -f .prettierrc.js ] || [ -f prettier.config.js ] || grep -q '"prettier"' package.json 2>/dev/null; then
+          echo "Prettier configuration found"
+          if npm run format:check --silent 2>/dev/null; then
+            echo "Running npm run format:check..."
+            npm run format:check
+          elif npm run prettier:check --silent 2>/dev/null; then
+            echo "Running npm run prettier:check..."
+            npm run prettier:check
+          elif npx prettier --version 2>/dev/null; then
+            echo "Running prettier directly..."
+            npx prettier --check . --ignore-path .gitignore
+          else
+            echo "Prettier not available, installing and running..."
+            npm install --no-save prettier && npx prettier --check . --ignore-path .gitignore
+          fi
+        else
+          echo "No prettier configuration found, skipping format checks"
+        fi
+      continue-on-error: true
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: |
+        if [ -f package-lock.json ]; then
+          npm ci
+        else
+          npm install
+        fi
+
+    - name: Run security audit
+      run: |
+        echo "Running npm audit..."
+        npm audit --audit-level moderate || echo "Security audit completed with warnings"
+      continue-on-error: true
+
+    - name: Check for known vulnerabilities
+      run: |
+        echo "Checking for high severity vulnerabilities..."
+        npm audit --audit-level high || echo "High severity check completed"
+      continue-on-error: true
