@@ -1,0 +1,51 @@
+{
+  "name": "node-mysql-express-async",
+  "version": "2.0.0",
+  "description": "Node.js Express MySQL REST API with async/await",
+  "main": "server_converted.js",
+  "scripts": {
+    "start": "node server_converted.js",
+    "dev": "nodemon server_converted.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mysql",
+    "rest",
+    "api",
+    "async",
+    "await"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.2"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "*.js",
+      "!node_modules/**",
+      "!coverage/**"
+    ],
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
