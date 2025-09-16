@@ -1,0 +1,1 @@
+Integration tests created in user.test.js
