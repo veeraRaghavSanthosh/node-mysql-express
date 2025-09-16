@@ -1,7 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const { securityHeaders } = require("./security-middleware.js");
 
 const app = express();
+
+// Apply security headers
+app.use(securityHeaders);
 
 const authMiddleware=(req,res,next)=>{
 next()
@@ -11,15 +15,8 @@ next()
 app.use(bodyParser.json());
 app.use('api/*',authMiddleware);
 
-
-
- 
-// GET, PUT, POST, DELETE, 
-
-
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
-
 
 function middleware1 (req,res,next)  {
   // Logic to supply the data 
@@ -49,7 +46,6 @@ function middleware2 (req,res,next){
 app.get("/user",middleware1 ,middleware2);
 
 require("./app/routes/customer.routes.js")(app);
-
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
