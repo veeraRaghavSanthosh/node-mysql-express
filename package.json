@@ -4,7 +4,10 @@
   "description": "Node.js Restful CRUD API with Node.js, Express and MySQL",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "test": "mocha test/**/*.test.js",
+    "test:watch": "mocha test/**/*.test.js --watch",
+    "test:coverage": "nyc mocha test/**/*.test.js"
   },
   "keywords": [
     "nodejs",
@@ -18,5 +21,12 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "mysql": "^2.17.1"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.8",
+    "supertest": "^6.3.3",
+    "nyc": "^15.1.0",
+    "mysql2": "^3.6.0"
   }
 }
