@@ -1,5 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const logger = require("./app/config/logger.config.js");
 
 const app = express();
 
@@ -49,10 +50,11 @@ function middleware2 (req,res,next){
 app.get("/user",middleware1 ,middleware2);
 
 require("./app/routes/customer.routes.js")(app);
+require("./app/routes/billing.routes.js")(app);
 
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+  logger.info(`Server is running on port ${PORT}`, { port: PORT });
 });
