@@ -3,8 +3,40 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
-const authMiddleware=(req,res,next)=>{
-next()
+const authMiddleware = (req, res, next) => {
+  // Extract token from Authorization header
+  const authHeader = req.headers.authorization;
+  
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({
+      error: 'Access denied. No token provided or invalid format.',
+      message: 'Please provide a valid Bearer token in the Authorization header'
+    });
+  }
+
+  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+  
+  if (!token) {
+    return res.status(401).json({
+      error: 'Access denied. Token is empty.',
+      message: 'Please provide a valid token'
+    });
+  }
+
+  // For now, we'll use a simple validation
+  // In a real app, you'd verify JWT tokens here
+  if (token === 'valid-token') {
+    req.user = { id: 1, email: 'test@example.com', role: 'user' };
+    next();
+  } else if (token === 'admin-token') {
+    req.user = { id: 2, email: 'admin@example.com', role: 'admin' };
+    next();
+  } else {
+    return res.status(403).json({
+      error: 'Access denied. Invalid token.',
+      message: 'The provided token is not valid'
+    });
+  }
 }
 
 // parse requests of content-type - application/json
@@ -49,6 +81,12 @@ function middleware2 (req,res,next){
 app.get("/user",middleware1 ,middleware2);
 
 require("./app/routes/customer.routes.js")(app);
+
+// Auth routes (not protected by authMiddleware)
+const auth = require("./app/controllers/auth.controller.js");
+app.post("/auth/login", auth.login);
+app.post("/auth/register", auth.register);
+app.get("/auth/profile", authMiddleware, auth.profile);
 
 
 // set port, listen for requests
