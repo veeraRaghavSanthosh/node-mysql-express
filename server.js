@@ -1,5 +1,4 @@
 const express = require("express");
-const bodyParser = require("body-parser");
 
 const app = express();
 
@@ -8,17 +7,11 @@ next()
 }
 
 // parse requests of content-type - application/json
-app.use(bodyParser.json());
+app.use(express.json());
 app.use('api/*',authMiddleware);
 
-
-
- 
-// GET, PUT, POST, DELETE, 
-
-
 // parse requests of content-type - application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 
 
 function middleware1 (req,res,next)  {
