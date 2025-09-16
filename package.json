@@ -4,7 +4,10 @@
   "description": "Node.js Restful CRUD API with Node.js, Express and MySQL",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "migrate:up": "node migrations/migration-runner.js up",
+    "migrate:down": "node migrations/migration-runner.js down"
   },
   "keywords": [
     "nodejs",
@@ -18,5 +21,9 @@
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
     "mysql": "^2.17.1"
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "mysql2": "^3.6.0"
   }
 }
