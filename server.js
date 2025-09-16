@@ -1,7 +1,11 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const helmet = require("helmet");
 
 const app = express();
+
+// Use helmet for security headers
+app.use(helmet());
 
 const authMiddleware=(req,res,next)=>{
 next()
