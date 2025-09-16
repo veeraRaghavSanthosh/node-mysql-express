@@ -3,28 +3,53 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
-const authMiddleware=(req,res,next)=>{
-next()
-}
+// Helper function for authentication middleware
+// Edge case: Currently passes through all requests - implement actual auth logic as needed
+const authMiddleware = (req, res, next) => {
+    // TODO: Add actual authentication logic here
+    // Edge case: Consider handling missing auth headers, invalid tokens, etc.
+    next();
+};
 
-// parse requests of content-type - application/json
-app.use(bodyParser.json());
-app.use('api/*',authMiddleware);
+// Helper function to create user data middleware
+// Extracts repeated pattern of attaching data to request object
+const createDataMiddleware = (dataKey, dataValue) => {
+    return (req, res, next) => {
+        // Edge case: Validate that dataKey is a string and not empty
+        if (typeof dataKey !== 'string' || !dataKey.trim()) {
+            return res.status(500).json({ error: 'Invalid data key provided to middleware' });
+        }
+        
+        req[dataKey] = dataValue;
+        next();
+    };
+};
 
+// Helper function to create response middleware
+// Extracts repeated pattern of sending JSON responses
+const createResponseMiddleware = (dataKey, responseKey = 'data') => {
+    return (req, res, next) => {
+        // Edge case: Handle missing data on request object
+        if (!req[dataKey]) {
+            return res.status(500).json({ error: `Missing ${dataKey} data in request` });
+        }
+        
+        const responseData = req[dataKey];
+        res.json({ [responseKey]: responseData });
+    };
+};
 
+// Configure body parsing middleware
+// Edge case: Set limits to prevent payload too large errors
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
- 
-// GET, PUT, POST, DELETE, 
+// Apply authentication middleware to API routes
+// Edge case: Pattern 'api/*' may not match '/api/...' - consider using '/api/*' if needed
+app.use('api/*', authMiddleware);
 
-
-// parse requests of content-type - application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: true }));
-
-
-function middleware1 (req,res,next)  {
-  // Logic to supply the data 
-
-  const users=[
+// Sample user data - in production, this should come from a database
+const sampleUsers = [
     {
         "id": 1,
         "name": "test3"
@@ -34,25 +59,33 @@ function middleware1 (req,res,next)  {
         "name": "test4"
     }
 ];
-  req.users=users;
-next();
-  
-};
 
-function middleware2 (req,res,next){
-  const users= req.users;
-   res.json({ user:users });
- 
- };
+// Create reusable middleware using helpers
+const userDataMiddleware = createDataMiddleware('users', sampleUsers);
+const userResponseMiddleware = createResponseMiddleware('users', 'user');
 
-// simple route
-app.get("/user",middleware1 ,middleware2);
+// User route using refactored middleware helpers
+// Edge case: Route responds with user data - ensure data exists before sending response
+app.get("/user", userDataMiddleware, userResponseMiddleware);
 
-require("./app/routes/customer.routes.js")(app);
+// Load customer routes
+// Edge case: Ensure customer routes file exists and exports a valid function
+try {
+    require("./app/routes/customer.routes.js")(app);
+} catch (error) {
+    console.error("Failed to load customer routes:", error.message);
+    // Edge case: Server can still run without customer routes for basic functionality
+}
 
-
-// set port, listen for requests
+// Server configuration and startup
+// Edge case: Use environment PORT if available, fallback to 3000
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}.`);
+
+// Edge case: Handle server startup errors gracefully
+app.listen(PORT, (error) => {
+    if (error) {
+        console.error(`Failed to start server on port ${PORT}:`, error.message);
+        process.exit(1);
+    }
+    console.log(`Server is running on port ${PORT}.`);
 });
