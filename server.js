@@ -1,7 +1,13 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const helmet = require("helmet");
+const { generalLimiter } = require("./app/middleware/rateLimiter.js");
 
 const app = express();
+
+// Security middleware
+app.use(helmet()); // Add security headers
+app.use(generalLimiter); // Apply general rate limiting
 
 const authMiddleware=(req,res,next)=>{
 next()

@@ -4,8 +4,15 @@ const Customer = require("../models/customer.model.js");
 exports.create = (req, res) => {
   // Validate request
   if (!req.body) {
-    res.status(400).send({
+    return res.status(400).send({
       message: "Content can not be empty!"
+    });
+  }
+
+  // Additional validation for required fields
+  if (!req.body.email || !req.body.name) {
+    return res.status(400).send({
+      message: "Email and name are required fields!"
     });
   }
 
@@ -60,7 +67,7 @@ exports.findOne = (req, res) => {
 exports.update = (req, res) => {
   // Validate Request
   if (!req.body) {
-    res.status(400).send({
+    return res.status(400).send({
       message: "Content can not be empty!"
     });
   }
