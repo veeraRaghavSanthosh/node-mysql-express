@@ -1,22 +1,37 @@
 {
-  "name": "nodejs-express-mysql",
+  "name": "node-mysql-express-migrations",
   "version": "1.0.0",
-  "description": "Node.js Restful CRUD API with Node.js, Express and MySQL",
-  "main": "server.js",
+  "description": "Database migrations for Node.js MySQL Express application",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "migrate:up": "node migrations/migration-runner.js up",
+    "migrate:down": "node migrations/migration-runner.js down",
+    "migrate:status": "node migrations/migration-runner.js status",
+    "migrate:test": "node migrations/test-migration.js",
+    "migrate:run": "node migrations/migration-runner.js run",
+    "migrate:rollback": "node migrations/migration-runner.js rollback"
   },
   "keywords": [
     "nodejs",
-    "express",
     "mysql",
-    "restapi"
+    "express",
+    "migrations",
+    "database"
   ],
-  "author": "veera",
-  "license": "ISC",
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "mysql": "^2.17.1"
-  }
+    "mysql2": "^3.6.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veeraRaghavSanthosh/node-mysql-express.git"
+  },
+  "author": "veeraRaghavSanthosh",
+  "license": "MIT"
 }
