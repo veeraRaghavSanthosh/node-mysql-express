@@ -1,0 +1,29 @@
+{
+  "name": "nodejs-express-mysql-usage-examples",
+  "version": "1.0.0",
+  "description": "Usage examples for the Node.js Express MySQL REST API",
+  "main": "javascript-example.js",
+  "scripts": {
+    "test-js": "node javascript-example.js",
+    "test-ts": "tsc typescript-example-simple.ts --target es2017 --module commonjs --lib es2017,dom && node typescript-example-simple.js",
+    "compile-ts": "tsc typescript-example-simple.ts --target es2017 --module commonjs --lib es2017,dom"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mysql",
+    "restapi",
+    "typescript",
+    "javascript",
+    "examples"
+  ],
+  "author": "Usage Examples",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.9.0",
+    "@types/node": "^18.0.0"
+  },
+  "optionalDependencies": {
+    "axios": "^1.0.0"
+  }
+}
