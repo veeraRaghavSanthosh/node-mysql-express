@@ -1,0 +1,31 @@
+{
+  "name": "node-mysql-express-js-example",
+  "version": "1.0.0",
+  "description": "JavaScript usage example for node-mysql-express library",
+  "main": "usage-examples.js",
+  "scripts": {
+    "start": "node usage-examples.js",
+    "dev": "nodemon usage-examples.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mysql",
+    "restapi",
+    "javascript"
+  ],
+  "author": "node-mysql-express",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mysql": "^2.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  }
+}
