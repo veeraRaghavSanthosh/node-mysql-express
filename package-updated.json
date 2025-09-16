@@ -1,0 +1,39 @@
+{
+  "name": "nodejs-express-mysql",
+  "version": "1.1.0",
+  "description": "Node.js Restful CRUD API with Node.js, Express and MySQL - Enhanced with Security Features",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node __tests__/security.test.js",
+    "test:jest": "jest",
+    "test:watch": "jest --watch",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "mysql",
+    "restapi",
+    "security",
+    "rate-limiting",
+    "input-validation",
+    "sanitization"
+  ],
+  "author": "veera",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "mysql": "^2.17.1",
+    "express-rate-limit": "^6.7.0",
+    "express-validator": "^6.15.0",
+    "helmet": "^6.1.5",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^2.0.22"
+  }
+}
