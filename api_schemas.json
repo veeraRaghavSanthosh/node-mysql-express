@@ -1,0 +1,480 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Node.js Express MySQL Authentication API",
+    "description": "RESTful API with authentication middleware for customer management",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Development server"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "Customer": {
+        "type": "object",
+        "required": ["email", "name"],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique customer identifier",
+            "example": 1,
+            "readOnly": true
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email address",
+            "example": "john.doe@example.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Customer full name",
+            "example": "John Doe"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Customer active status",
+            "example": true,
+            "default": true
+          }
+        }
+      },
+      "CustomerInput": {
+        "type": "object",
+        "required": ["email", "name"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email address",
+            "example": "john.doe@example.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Customer full name",
+            "example": "John Doe"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Customer active status",
+            "example": true,
+            "default": true
+          }
+        }
+      },
+      "CustomerUpdate": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Customer email address",
+            "example": "john.updated@example.com"
+          },
+          "name": {
+            "type": "string",
+            "description": "Customer full name",
+            "example": "John Updated"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Customer active status",
+            "example": false
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Unique user identifier",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "description": "User name",
+            "example": "test3"
+          }
+        }
+      },
+      "UsersResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/User"
+            },
+            "description": "Array of user objects"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message describing what went wrong",
+            "example": "Some error occurred while creating the Customer."
+          }
+        }
+      },
+      "SuccessMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Success message",
+            "example": "Customer was deleted successfully!"
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "Bad request - invalid input data",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "message": "Content can not be empty!"
+            }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "message": "Not found Customer with id 1."
+            }
+          }
+        }
+      },
+      "InternalServerError": {
+        "description": "Internal server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            },
+            "example": {
+              "message": "Some error occurred while processing the request."
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "AuthMiddleware": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Authentication middleware (currently pass-through for backward compatibility)"
+      }
+    }
+  },
+  "paths": {
+    "/user": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Get users list",
+        "description": "Retrieves a list of users through middleware chain demonstration. This is a public endpoint that doesn't require authentication.",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersResponse"
+                },
+                "example": {
+                  "user": [
+                    {
+                      "id": 1,
+                      "name": "test3"
+                    },
+                    {
+                      "id": 2,
+                      "name": "test4"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/customers": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get all customers",
+        "description": "Retrieves all customer records. When accessed via /api/customers, this endpoint is protected by authentication middleware.",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved all customers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                },
+                "example": [
+                  {
+                    "id": 1,
+                    "email": "john.doe@example.com",
+                    "name": "John Doe",
+                    "active": true
+                  },
+                  {
+                    "id": 2,
+                    "email": "jane.smith@example.com",
+                    "name": "Jane Smith",
+                    "active": false
+                  }
+                ]
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Create a new customer",
+        "description": "Creates a new customer record. When accessed via /api/customers, this endpoint is protected by authentication middleware.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerInput"
+              },
+              "example": {
+                "email": "john.doe@example.com",
+                "name": "John Doe",
+                "active": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": 1,
+                  "email": "john.doe@example.com",
+                  "name": "John Doe",
+                  "active": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Customers"],
+        "summary": "Delete all customers",
+        "description": "Deletes all customer records. When accessed via /api/customers, this endpoint is protected by authentication middleware.",
+        "responses": {
+          "200": {
+            "description": "All customers deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessMessage"
+                },
+                "example": {
+                  "message": "All Customers were deleted successfully!"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/customers/{customerId}": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get customer by ID",
+        "description": "Retrieves a specific customer by ID. When accessed via /api/customers/{customerId}, this endpoint is protected by authentication middleware.",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the customer",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer found and returned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": 1,
+                  "email": "john.doe@example.com",
+                  "name": "John Doe",
+                  "active": true
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "put": {
+        "tags": ["Customers"],
+        "summary": "Update customer",
+        "description": "Updates an existing customer record. When accessed via /api/customers/{customerId}, this endpoint is protected by authentication middleware.",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the customer",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerUpdate"
+              },
+              "example": {
+                "email": "john.updated@example.com",
+                "name": "John Updated",
+                "active": false
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Customer updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                },
+                "example": {
+                  "id": 1,
+                  "email": "john.updated@example.com",
+                  "name": "John Updated",
+                  "active": false
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Customers"],
+        "summary": "Delete customer",
+        "description": "Deletes a specific customer by ID. When accessed via /api/customers/{customerId}, this endpoint is protected by authentication middleware.",
+        "parameters": [
+          {
+            "name": "customerId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the customer",
+            "schema": {
+              "type": "integer",
+              "example": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Customer deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessMessage"
+                },
+                "example": {
+                  "message": "Customer was deleted successfully!"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Users",
+      "description": "User management operations (public endpoints)"
+    },
+    {
+      "name": "Customers", 
+      "description": "Customer management operations (protected by authentication middleware when accessed via /api/* routes)"
+    }
+  ]
+}

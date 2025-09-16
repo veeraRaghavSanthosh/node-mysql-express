@@ -3,10 +3,11 @@ const Customer = require("../models/customer.model.js");
 // Create and Save a new Customer
 exports.create = (req, res) => {
   // Validate request
-  if (!req.body) {
+  if (!req.body || Object.keys(req.body).length === 0) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
+    return;
   }
 
   // Create a Customer
@@ -59,10 +60,11 @@ exports.findOne = (req, res) => {
 // Update a Customer identified by the customerId in the request
 exports.update = (req, res) => {
   // Validate Request
-  if (!req.body) {
+  if (!req.body || Object.keys(req.body).length === 0) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
+    return;
   }
 
   console.log(req.body);
