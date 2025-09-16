@@ -2,28 +2,30 @@ const Customer = require("../models/customer.model.js");
 
 // Create and Save a new Customer
 exports.create = (req, res) => {
-  // Validate request
-  if (!req.body) {
-    res.status(400).send({
-      message: "Content can not be empty!"
+  // Validate request - additional validation on top of middleware
+  if (!req.body || (!req.body.email && !req.body.name)) {
+    return res.status(400).send({
+      message: "Email or name is required!"
     });
   }
 
-  // Create a Customer
+  // Create a Customer with sanitized data
   const customer = new Customer({
-    email: req.body.email,
+    email: req.body.email ? req.body.email.toLowerCase() : null,
     name: req.body.name,
-    active: req.body.active
+    active: req.body.active !== undefined ? req.body.active : true
   });
 
   // Save Customer in the database
   Customer.create(customer, (err, data) => {
-    if (err)
+    if (err) {
+      console.error('Customer creation error:', err);
       res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Customer."
+        message: "Some error occurred while creating the Customer."
       });
-    else res.send(data);
+    } else {
+      res.status(201).send(data);
+    }
   });
 };
 

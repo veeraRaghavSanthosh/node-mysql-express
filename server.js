@@ -1,14 +1,21 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const cors = require("cors");
+const { helmet, generalLimiter } = require("./app/middleware/security");
 
 const app = express();
+
+// Security middleware
+app.use(helmet()); // Set security headers
+app.use(cors()); // Enable CORS with default settings
+app.use(generalLimiter); // Apply general rate limiting
 
 const authMiddleware=(req,res,next)=>{
 next()
 }
 
 // parse requests of content-type - application/json
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' })); // Add size limit to prevent large payload attacks
 app.use('api/*',authMiddleware);
 
 

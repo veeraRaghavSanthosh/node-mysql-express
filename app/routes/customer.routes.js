@@ -1,21 +1,54 @@
 module.exports = app => {
   const customers = require("../controllers/customer.controller.js");
+  const { 
+    strictLimiter, 
+    deleteLimiter, 
+    validateCustomerInput, 
+    validateCustomerId, 
+    handleValidationErrors,
+    sanitizeInput 
+  } = require("../middleware/security");
 
   // Create a new Customer
-  app.post("/customers", customers.create);
+  app.post("/customers", 
+    strictLimiter, 
+    sanitizeInput, 
+    validateCustomerInput, 
+    handleValidationErrors, 
+    customers.create
+  );
 
   // Retrieve all Customers
   app.get("/customers", customers.findAll);
 
   // Retrieve a single Customer with customerId
-  app.get("/customers/:customerId", customers.findOne);
+  app.get("/customers/:customerId", 
+    validateCustomerId, 
+    handleValidationErrors, 
+    customers.findOne
+  );
 
   // Update a Customer with customerId
-  app.put("/customers/:customerId", customers.update);
+  app.put("/customers/:customerId", 
+    strictLimiter, 
+    sanitizeInput, 
+    validateCustomerId, 
+    validateCustomerInput, 
+    handleValidationErrors, 
+    customers.update
+  );
 
   // Delete a Customer with customerId
-  app.delete("/customers/:customerId", customers.delete);
+  app.delete("/customers/:customerId", 
+    deleteLimiter, 
+    validateCustomerId, 
+    handleValidationErrors, 
+    customers.delete
+  );
 
-  // Create a new Customer
-  app.delete("/customers", customers.deleteAll);
+  // Delete all Customers (very dangerous operation)
+  app.delete("/customers", 
+    deleteLimiter, 
+    customers.deleteAll
+  );
 };
