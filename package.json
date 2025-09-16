@@ -1,22 +1,51 @@
 {
-  "name": "nodejs-express-mysql",
+  "name": "node-mysql-express",
   "version": "1.0.0",
-  "description": "Node.js Restful CRUD API with Node.js, Express and MySQL",
+  "description": "Node.js Express MySQL API with comprehensive authentication testing",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:auth": "jest tests/auth",
+    "test:verbose": "jest --verbose"
+  },
+  "dependencies": {
+    "express": "^4.18.0",
+    "body-parser": "^1.20.0",
+    "mysql": "^2.18.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "@types/jest": "^29.5.5",
+    "nodemon": "^3.0.1"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!node_modules/**",
+      "!coverage/**",
+      "!jest.config.js"
+    ],
+    "testMatch": [
+      "**/tests/**/*.test.js",
+      "**/__tests__/**/*.js",
+      "**/?(*.)+(spec|test).js"
+    ],
+    "coverageReporters": ["text", "lcov", "html"],
+    "coverageDirectory": "coverage"
   },
   "keywords": [
     "nodejs",
     "express",
     "mysql",
-    "restapi"
+    "api",
+    "authentication",
+    "testing"
   ],
-  "author": "veera",
-  "license": "ISC",
-  "dependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "mysql": "^2.17.1"
-  }
+  "author": "Developer",
+  "license": "MIT"
 }
