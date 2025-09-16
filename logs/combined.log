@@ -1,0 +1,21 @@
+{"level":"info","message":"Test info message","service":"payment-service","timestamp":"2025-09-16 15:14:45"}
+{"level":"warn","message":"Test warn message","service":"payment-service","timestamp":"2025-09-16 15:14:45"}
+{"level":"error","message":"Test error message","service":"payment-service","timestamp":"2025-09-16 15:14:45"}
+{"level":"info","message":"Test info message","service":"payment-service","timestamp":"2025-09-16 15:15:06"}
+{"level":"warn","message":"Test warn message","service":"payment-service","timestamp":"2025-09-16 15:15:06"}
+{"level":"error","message":"Test error message","service":"payment-service","timestamp":"2025-09-16 15:15:06"}
+{"level":"info","message":"Test info message","service":"payment-service","timestamp":"2025-09-16 15:15:45"}
+{"level":"warn","message":"Test warn message","service":"payment-service","timestamp":"2025-09-16 15:15:45"}
+{"level":"error","message":"Test error message","service":"payment-service","timestamp":"2025-09-16 15:15:45"}
+{"key":"value","level":"info","message":"Test message","service":"payment-service","timestamp":"2025-09-16 15:15:45"}
+{"error":"details","level":"error","message":"Error message","service":"payment-service","stack":"trace","timestamp":"2025-09-16 15:15:45"}
+{"level":"info","message":"Test info message","service":"payment-service","timestamp":"2025-09-16 15:15:58"}
+{"level":"warn","message":"Test warn message","service":"payment-service","timestamp":"2025-09-16 15:15:58"}
+{"level":"error","message":"Test error message","service":"payment-service","timestamp":"2025-09-16 15:15:58"}
+{"key":"value","level":"info","message":"Test message","service":"payment-service","timestamp":"2025-09-16 15:15:58"}
+{"error":"details","level":"error","message":"Error message","service":"payment-service","stack":"trace","timestamp":"2025-09-16 15:15:58"}
+{"code":500,"error":"Sample error","level":"error","message":"This is an ERROR level message","service":"payment-service","timestamp":"2025-09-16 15:16:28"}
+{"action":"review_required","level":"warn","message":"This is a WARN level message","service":"payment-service","timestamp":"2025-09-16 15:16:28","warning":"Sample warning"}
+{"amount":100.5,"customer_id":1,"level":"info","message":"This is an INFO level message","operation":"payment_processed","service":"payment-service","timestamp":"2025-09-16 15:16:28"}
+{"debug_info":"detailed_operation_info","level":"debug","message":"This is a DEBUG level message","params":[123],"query":"SELECT * FROM payments WHERE id = ?","service":"payment-service","timestamp":"2025-09-16 15:16:28"}
+{"args":{"amount":100.5,"customer_id":1},"function":"processPayment","level":"trace","message":"This is a TRACE level message","service":"payment-service","timestamp":"2025-09-16 15:16:28","trace_info":"function_entry_exit"}
