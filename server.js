@@ -1,5 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const {
+  apiLimiter,
+  speedLimiter,
+  securityHeaders,
+  securityLogger,
+  sanitizeInput
+} = require("./app/middleware/security.middleware");
 
 const app = express();
 
@@ -7,8 +14,15 @@ const authMiddleware=(req,res,next)=>{
 next()
 }
 
+// Apply security middleware
+app.use(securityHeaders);
+app.use(securityLogger);
+app.use(speedLimiter);
+app.use('/customers', apiLimiter);
+
 // parse requests of content-type - application/json
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(sanitizeInput);
 app.use('api/*',authMiddleware);
 
 

@@ -17,6 +17,11 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "mysql": "^2.17.1"
+    "mysql": "^2.17.1",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^6.1.5",
+    "express-validator": "^6.15.0",
+    "xss": "^1.0.14",
+    "express-slow-down": "^1.6.0"
   }
 }

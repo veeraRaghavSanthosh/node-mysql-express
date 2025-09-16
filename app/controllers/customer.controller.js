@@ -2,28 +2,25 @@ const Customer = require("../models/customer.model.js");
 
 // Create and Save a new Customer
 exports.create = (req, res) => {
-  // Validate request
-  if (!req.body) {
-    res.status(400).send({
-      message: "Content can not be empty!"
-    });
-  }
-
-  // Create a Customer
+  // Input validation is now handled by middleware
+  
+  // Create a Customer with sanitized input
   const customer = new Customer({
     email: req.body.email,
     name: req.body.name,
-    active: req.body.active
+    active: req.body.active !== undefined ? req.body.active : true
   });
 
   // Save Customer in the database
   Customer.create(customer, (err, data) => {
-    if (err)
+    if (err) {
+      console.error('Error creating customer:', err);
       res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Customer."
+        message: "Some error occurred while creating the Customer."
       });
-    else res.send(data);
+    } else {
+      res.status(201).send(data);
+    }
   });
 };
 
@@ -58,14 +55,7 @@ exports.findOne = (req, res) => {
 
 // Update a Customer identified by the customerId in the request
 exports.update = (req, res) => {
-  // Validate Request
-  if (!req.body) {
-    res.status(400).send({
-      message: "Content can not be empty!"
-    });
-  }
-
-  console.log(req.body);
+  // Input validation is now handled by middleware
 
   Customer.updateById(
     req.params.customerId,
