@@ -1,0 +1,32 @@
+{
+  "name": "nodejs-express-mysql-tests",
+  "version": "1.0.0",
+  "description": "Unit tests for Node.js Express MySQL REST API",
+  "main": "customer.test.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "collectCoverageFrom": [
+      "../app/**/*.js",
+      "!../app/config/**",
+      "!**/node_modules/**"
+    ],
+    "coverageDirectory": "./coverage",
+    "coverageReporters": [
+      "text",
+      "lcov",
+      "html"
+    ]
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  },
+  "dependencies": {
+    "axios": "^1.6.0"
+  }
+}
