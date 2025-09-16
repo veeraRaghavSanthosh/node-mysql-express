@@ -1,7 +1,14 @@
 const express = require("express");
 const bodyParser = require("body-parser");
+const { helmetConfig, generalRateLimit } = require("./app/middleware/security");
 
 const app = express();
+
+// Apply security headers
+app.use(helmetConfig);
+
+// Apply general rate limiting to all requests
+app.use(generalRateLimit);
 
 const authMiddleware=(req,res,next)=>{
 next()
@@ -45,8 +52,8 @@ function middleware2 (req,res,next){
  
  };
 
-// simple route
-app.get("/user",middleware1 ,middleware2);
+// simple route (existing functionality maintained for backward compatibility)
+app.get("/user", middleware1, middleware2);
 
 require("./app/routes/customer.routes.js")(app);
 
